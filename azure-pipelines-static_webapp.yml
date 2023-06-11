@@ -1,0 +1,57 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '14.x'
+  displayName: 'Install Node.js'
+
+- task: Npm@1
+  inputs:
+    command: 'install'
+    workingDir: '$(System.DefaultWorkingDirectory)'
+  displayName: 'Install dependencies'
+
+- task: Npm@1
+  inputs:
+    command: 'custom'
+    workingDir: '$(System.DefaultWorkingDirectory)'
+    customCommand: 'run build'
+  displayName: 'Build application'
+- task: AzureStaticWebApp@0
+  inputs:
+      app_location: '/'
+      output_location: 'dist/my-app'
+      api_location: 'api'
+  env:
+      azure_static_web_apps_api_token: $(deployment_token)
+
+#- task: AzureCLI@2
+#  inputs:
+#    azureSubscription: 'my-service-connection'
+#    scriptLocation: 'inlineScript'
+#    scriptType: 'inlineScript'
+#    inlineScript: |
+#      az login --service-principal --username d2935742-343d-47e5-af9f-7a1102d5e6af --password EDy8Q~udwBee.xzfG.EQCzjJTaHXiiwTkKpcVak- --tenant b8634501-c092-4bf5-8ad8-07329bfb2e90
+#      az artifacts universal publish --organization https://dev.azure.com/kloudping --feed kloudping --name my-app --version $(Build.BuildNumber) --type "node.js" --path "$(System.DefaultWorkingDirectory)/_Angular-Demo"
+#      Write-Host "Deployed artifact: $($deployedPackage.PackageUri)"
+#  displayName: 'Publish artifact'
+
+#- task: AzureStaticWebApp@0
+#  inputs:
+#    app_location: '$(System.DefaultWorkingDirectory)'
+#    api_location: 'Global'
+#    output_location: '$(System.DefaultWorkingDirectory)/build'
+#    azure_static_web_apps_api_token: '217dff0cdc31662939db8069054db9d6616edceb3958240ecf2ccd3bd96a81bd3-f740c53d-54b7-4639-a0c0-0d4e933e4214010197907'
+#    repo_token: '$(System.AccessToken)'
+#    action: 'upload'
+#    sku: 'Free'
+#    app_name: 'azurestatic'
+#    environment_name: 'production'
+#  displayName: 'Publish to Azure Static Web App'
+
+

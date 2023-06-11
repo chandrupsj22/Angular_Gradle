@@ -1,0 +1,38 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '14.x'
+  displayName: 'Install Node.js'
+
+- task: Npm@1
+  inputs:
+    command: 'install'
+    workingDir: '$(System.DefaultWorkingDirectory)'
+  displayName: 'Install dependencies'
+
+- task: Npm@1
+  inputs:
+    command: 'custom'
+    workingDir: '$(System.DefaultWorkingDirectory)'
+    customCommand: 'run build'
+  displayName: 'Build application'
+
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: 'my-service-connection' 
+    appName: 'webs-apps' 
+    package: '$(System.DefaultWorkingDirectory)/dist/my-app'
+    publishProfile: 'webs-apps.PublishSettings' # Replace with the name of your Azure Web App publish profile
+    enableXmlFiles: true
+    # Set to 'true' if your Angular application uses XML files (e.g., for localization)
+
+- task: CmdLine@2
+  inputs:
+    script: 'curl https://webs-apps.azurewebsites.net/'
+  displayName: 'Test deployed app'
